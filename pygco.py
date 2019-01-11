@@ -5,7 +5,7 @@ from cgco import _cgco
 # keep 4 effective digits for the fractional part if using real potentials
 # make sure pairwise * smooth = unary so that the unary potentials and pairwise
 # potentials are on the same scale.
-_MAX_ENERGY_TERM_SCALE = 10000000 
+_MAX_ENERGY_TERM_SCALE = 10000000
 _UNARY_FLOAT_PRECISION = 100000
 _PAIRWISE_FLOAT_PRECISION = 1000
 _SMOOTH_COST_PRECISION = 100
@@ -38,7 +38,7 @@ class gco(object):
         pass
 
     def createGeneralGraph(self, numSites, numLabels, energyIsFloat=False):
-        """Create a general graph with specified number of sites and labels. 
+        """Create a general graph with specified number of sites and labels.
         If energyIsFloat is set to True, then automatic scaling and rounding
         will be applied to convert all energies to integers when running graph
         cuts. Then the final energy will be converted back to floats after the
@@ -98,9 +98,9 @@ class gco(object):
             return e
 
     def setDataCost(self, unary):
-        """Set unary potentials, unary should be a matrix of size 
+        """Set unary potentials, unary should be a matrix of size
         numSites x numLabels. unary can be either integers or float"""
-        
+
         if (self.numSites, self.numLabels) != unary.shape:
             raise ShapeMismatchError(
                     "Shape of unary potentials does not match the graph.")
@@ -133,7 +133,7 @@ class gco(object):
         if s1.min() < 0 or s1.max() >= self.numSites or s2.min() < 0 or s2.max() >= self.numSites:
             raise IndexOutOfBoundError()
 
-        # These attributes are just used to keep a reference to corresponding 
+        # These attributes are just used to keep a reference to corresponding
         # arrays, otherwise the temporarily used arrays will be destroyed by
         # python's garbage collection system, and the C++ library won't have
         # access to them any more, which may cause trouble.
@@ -145,9 +145,9 @@ class gco(object):
                 self.handle, self._edgeS1, self._edgeS2, self._edgeW, np.intc(self._edgeS1.size))
 
     def setSmoothCost(self, cost):
-        """Set smooth cost. cost should be a symmetric numpy square matrix of 
+        """Set smooth cost. cost should be a symmetric numpy square matrix of
         size numLabels x numLabels.
-        
+
         cost[l1, l2] is the cost of labeling l1 as l2 (or l2 as l1)
         """
         if cost.shape[0] != cost.shape[1] or (cost != cost.T).any():
@@ -167,12 +167,12 @@ class gco(object):
                 self.handle, np.intc(l1), np.intc(l2), self._convertSmoothCostTerm(cost))
 
     def expansion(self, niters=-1):
-        """Do alpha-expansion for specified number of iterations. 
+        """Do alpha-expansion for specified number of iterations.
         Return total energy after the expansion moves.
         If niters is set to -1, the algorithm will run until convergence."""
         _cgco.gcoExpansion(self.handle, np.intc(niters), self.energyTempArray)
         return self._convertEnergyBack(self.energyTempArray[0])
-        
+
     def expansionOnAlpha(self, label):
         """Do one alpha-expansion move for the specified label.
         Return True if the energy decreases, return False otherwise."""
@@ -231,7 +231,7 @@ class gco(object):
         _cgco.gcoInitLabelAtSite(self.handle, np.intc(site), np.intc(label))
 
 
-def cut_general_graph(edges, edge_weights, unary_cost, pairwise_cost, 
+def cut_general_graph(edges, edge_weights, unary_cost, pairwise_cost,
         n_iter=-1, algorithm='expansion', init_labels=None, down_weight_factor=None):
     """
     Apply multi-label graph cuts to arbitrary graph given by `edges`.
@@ -269,8 +269,8 @@ def cut_general_graph(edges, edge_weights, unary_cost, pairwise_cost,
             (pairwise_cost.dtype in _float_types)
 
     if not energy_is_float and not (
-            (unary_cost.dtype in _int_types) and 
-            (edge_weights.dtype in _int_types) and 
+            (unary_cost.dtype in _int_types) and
+            (edge_weights.dtype in _int_types) and
             (pairwise_cost.dtype in _int_types)):
         raise DataTypeNotSupportedError(
                 "Unary and pairwise potentials should have consistent types. "
@@ -280,7 +280,7 @@ def cut_general_graph(edges, edge_weights, unary_cost, pairwise_cost,
     n_sites, n_labels = unary_cost.shape
 
     if down_weight_factor == None:
-        down_weight_factor = max(np.abs(unary_cost).max(), 
+        down_weight_factor = max(np.abs(unary_cost).max(),
                 np.abs(edge_weights).max() * pairwise_cost.max()) + _SMALL_CONSTANT
 
     gc = gco()
@@ -304,7 +304,7 @@ def cut_general_graph(edges, edge_weights, unary_cost, pairwise_cost,
 
     return labels
 
-def cut_grid_graph(unary_cost, pairwise_cost, costV, costH, 
+def cut_grid_graph(unary_cost, pairwise_cost, costV, costH,
         n_iter=-1, algorithm='expansion'):
     """
     Apply multi-label graphcuts to grid graph.
@@ -316,7 +316,7 @@ def cut_grid_graph(unary_cost, pairwise_cost, costV, costH,
     pairwise_cost: ndarray, int32, shape=(n_labels, n_labels)
         Pairwise potentials for label compatibility
     costV: ndarray, int32, shape=(height-1, width)
-        Vertical edge weights. 
+        Vertical edge weights.
         costV[i,j] is the edge weight between (i,j) and (i+1,j)
     costH: ndarray, int32, shape=(height, width-1)
         Horizontal edge weights.
@@ -335,7 +335,7 @@ def cut_grid_graph(unary_cost, pairwise_cost, costV, costH,
             (costH.dtype in _float_types)
 
     if not energy_is_float and not (
-            (unary_cost.dtype in _int_types) and 
+            (unary_cost.dtype in _int_types) and
             (pairwise_cost.dtype in _int_types) and
             (costV.dtype in _int_types) and
             (costH.dtype in _int_types)):
