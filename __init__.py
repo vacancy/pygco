@@ -7,5 +7,14 @@
 #
 # Distributed under terms of the MIT license.
 
-from .pygco import cut_general_graph, cut_grid_graph, cut_grid_graph_simple
+try:
+    from jacinle.jit.cext import auto_travis
+    auto_travis(__file__, required_fies=['libcgco.so'])
+except:
+    pass
+
+try:
+    from .pygco import cut_general_graph, cut_grid_graph, cut_grid_graph_simple
+except ImportError as e:
+    raise ImportError('Auto travis for pygco failed. Run ./travis.sh manually.') from e
 
