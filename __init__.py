@@ -9,7 +9,7 @@
 
 try:
     from jacinle.jit.cext import auto_travis
-    auto_travis(__file__, required_fies=['libcgco.so'])
+    auto_travis(__file__, required_files=['libcgco.so'])
 except:
     pass
 
